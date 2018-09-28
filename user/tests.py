@@ -16,13 +16,15 @@ class UserTest(TestCase):
     def test_password(self):
         error = ''
         try:
-            User.objects.create(,
+            # test avec un mot de passe non sécurisé
+            User.objects.create('Shobu', 'password')
         except ValidationError as exception:
             error = exception
         self.assertEquals(type(error), ValidationError)
 
         try:
-            User.objects.create(,
+            # test avec un mot de passe sécurisé
+            User.objects.create('Shobu2', 'dsfjpbgG#')
         except ValidationError as exception:
             error = exception
         self.assertEquals(type(error), ValidationError)
