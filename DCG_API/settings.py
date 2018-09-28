@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
 
     'user',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +128,7 @@ STATIC_URL = '/static/'
 
 # custom user model
 AUTH_USER_MODEL = 'user.User'
+
+# Swagger
+LOGIN_URL = '/admin/login'
+LOGOUT_URL = '/admin/logout'

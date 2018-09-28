@@ -8,10 +8,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from user.models import User
-from api.serializers import UserSerializer, UserCreateSerializer, UserDetailSerializer
+from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer
 
 
-# Create your views here.
+# Create your viewsets here.
 
 class MultiSerializerViewSet(viewsets.GenericViewSet):
     """
@@ -28,6 +28,21 @@ class MultiSerializerViewSet(viewsets.GenericViewSet):
 
 
 class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, ):
+    """
+    Ce viewset permet de manipuler les donnée des Users.
+
+    list:
+    cette fonction permet de donner une liste non exaustive de tout les utilisateurs.
+    create:
+    cette fonction permet de créer un utilisateur, le mot de passe est récupérer et haché à l'aide
+    de la fonction make_password().
+    user_detail:
+    Peut être utiliser seulement si administrateur, affiche tout les détails sur un utilisateur.
+    user_detail_all:
+    Peut être utiliser seulement si administrateur, affiche tout les détails sur tout les utilisateurs.
+    destroy:
+    Cette fonction sert à supprimer un user.
+    """
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     queryset = User.objects.all()
 
@@ -49,7 +64,7 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     @action(
         detail=True,
         methods=['get'],
-        permission_classes=(permissions.IsAdminUser, ),
+        permission_classes=(permissions.IsAdminUser,),
         url_path='detail',
     )
     def user_detail(self, request, *args, **kwargs):
@@ -60,7 +75,7 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     @action(
         detail=False,
         methods=['get'],
-        permission_classes=(permissions.IsAdminUser, ),
+        permission_classes=(permissions.IsAdminUser,),
         url_path='detail_all',
     )
     def user_detail_all(self, request, *args, **kwargs):

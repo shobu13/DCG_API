@@ -14,12 +14,14 @@ class User(AbstractUser):
     act_prop_tous = models.BooleanField(default=False)
     act_part_visible = models.BooleanField(default=False)
     act_part_tous = models.BooleanField(default=False)
-    # lieux_fav =
-    # centres_interets =
-    # act_fav =
-    # amis =
-    # bloque =
+    # TODO créer les tables et gérer les clé étrangères.
+    # lieux_fav = clé étrangère vers table lieux, utile pour faire des comparaison entre users
+    # centres_interets = de même
+    # act_fav = voir au dessus
+    # amis = clé étrangère vers d'autres utilisateurs
+    # bloque = clé étrangère vers une table "bloquage"
     stay_connected = models.BooleanField(default=False)
+    # signalement = clé étrangère vers table signalement
 
     def save(self, *args, **kwargs):
         """surcharge de la méthode save de la class Model qui s'exécute à la sauvegarde d'un objet,
