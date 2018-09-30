@@ -8,5 +8,5 @@ class Promo(models.Model):
     description = models.TextField()
     start = models.DateTimeField()
     end = models.DateTimeField()
-    validation = models.BooleanField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    validation = models.BooleanField()

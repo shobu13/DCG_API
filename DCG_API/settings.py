@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'event',
     'interests',
     'places',
+    'promo',
 ]
 
 MIDDLEWARE = [
