@@ -4,21 +4,34 @@ from django.contrib.auth.password_validation import validate_password
 
 
 class User(AbstractUser):
+    """
+    Ce modèle est une extention du modèle user de base, il rajoute plusieurs champs.
+    act_prop_tous : ce champs définis si un utilisateur souhaite voir les activitées proposée
+    par tout le monde.
+
+    act_part_visible : ce champs définis si l'utilisateur veut que sa participation à une activité
+    sois visible par ses amis.
+
+    act_part_tous : ce champs définis si l'utilisateur veut que sa participation à une activité
+    sois visible par ses amis ET par tous, ce champs ne devrait prendre effet que si le précédent
+    à été mit à True.
+    """
     street = models.TextField()
     city = models.CharField(max_length=200)
     postal_code = models.CharField(max_length=5, default='')
     phone_number = models.CharField(max_length=12)
     birth_date = models.DateField(null=True)
-    photo = models.ImageField(upload_to='users/photos/')
-    # confidentialité
+    photo = models.ImageField(upload_to='users/photos/', blank=True)
+    # Confidentialité
     act_prop_tous = models.BooleanField(default=False)
     act_part_visible = models.BooleanField(default=False)
     act_part_tous = models.BooleanField(default=False)
+    # Social
     # TODO créer les tables et gérer les clé étrangères.
     # lieux_fav = clé étrangère vers table lieux, utile pour faire des comparaison entre users
     # centres_interets = de même
     # act_fav = voir au dessus
-    # amis = clé étrangère vers d'autres utilisateurs
+    amis = models.ManyToManyField('User', blank=True)
     # bloque = clé étrangère vers une table "bloquage"
     stay_connected = models.BooleanField(default=False)
     # signalement = clé étrangère vers table signalement

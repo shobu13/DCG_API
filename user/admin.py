@@ -14,7 +14,15 @@ class UserAdminCustom(UserAdmin):
                                    'fields': ('act_prop_tous', 'act_part_visible', 'act_part_tous',
                                               'stay_connected')
                                },
+                           ), (
+                               'Social', {
+                                   'fields': ('amis',)
+                               },
                            ),
+    filter_horizontal = ('amis',)
+
+    for i in UserAdmin.fieldsets:
+        i[1]['classes'] = ('collapse',)
 
 
 admin.site.register(User, UserAdminCustom)
