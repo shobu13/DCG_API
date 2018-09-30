@@ -53,13 +53,9 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
         'user_detail_all': UserDetailSerializer,
     }
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer["password"] = make_password(serializer["password"])
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def perform_create(self, serializer):
+        user = serializer.save()
+        user.password = make_password(serializer["password"])
 
     @action(
         detail=True,
