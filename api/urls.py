@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, URLPattern
 
 from rest_framework.routers import DefaultRouter
 from rest_framework_swagger.views import get_swagger_view
@@ -27,3 +27,6 @@ urlpatterns = [
     path('docs/', get_swagger_view(title='read the docs bastard'))
 ]
 urlpatterns += router.urls
+# i: URLPattern
+# for i in router.urls:
+#     print(i.name, i.pattern)

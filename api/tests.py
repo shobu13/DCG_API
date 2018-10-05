@@ -1,7 +1,6 @@
 import json
 
 from django.forms import model_to_dict
-from django.test import TestCase
 
 import datetime
 
@@ -11,9 +10,13 @@ from rest_framework.test import APIClient, APITestCase
 
 from user.models import User
 
+from api.serializers.user import UserDetailSerializer, UserSerializer
+
 
 class UserViewsetTest(APITestCase):
-
+    """
+    class de test des endpoints lié aux users.
+    """
     @classmethod  # <- setUpClass doit être une méthode de classe, attention !
     def setUpTestData(cls):
         super_user = User.objects.create_superuser(username='admin', password='sysadmin', email='')
@@ -46,41 +49,20 @@ class UserViewsetTest(APITestCase):
     def test_endpoint_list(self):
         url = reverse('user-list')
         response = self.client.get(url, format='json')
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
         user_list = json.loads(response.content)
-        # user_test = json.loads(response.content)[0]
-        # print(user_test)
-        # self.assertEquals(user_test.get('id'), self.user.id)
-        # self.assertEquals(user_test.get('username'), self.user.username)
-        # self.assertEquals(user_test.get('first_name'), self.user.first_name)
-        # self.assertEquals(user_test.get('last_name'), self.user.last_name)
-        # self.assertEquals(user_test.get('is_staff'), self.user.is_staff)
-        # self.assertEquals(user_test.get('last_login'), self.user.last_login)
-        # assert isinstance(self.user.date_joined, datetime.datetime)
-        # self.assertEquals(
-        #     user_test.get('date_joined'),
-        #     str(self.user.date_joined.strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
-        # )
 
         for user in user_list:
-            print(user)
             id = user.get('id')
-            user_model = model_to_dict(User.objects.get(id=id))
-            user_model['date_joined'] = user_model.get('date_joined').strftime(
-                '%Y-%m-%dT%H:%M:%S.%fZ')
-            self.assertEquals(user_model.get('id'), user.get('id'))
-            self.assertEquals(user_model.get('username'), user.get('username'))
-            self.assertEquals(user_model.get('first_name'), user.get('first_name'))
-            self.assertEquals(user_model.get('last_name'), user.get('last_name'))
-            self.assertEquals(user_model.get('is_staff'), user.get('is_staff'))
-            self.assertEquals(user_model.get('last_login'), user.get('last_login'))
-            assert isinstance(self.user.date_joined, datetime.datetime)
-            self.assertEquals(user_model.get('date_joined'), user.get('date_joined'))
+            user_model = UserSerializer(model_to_dict(User.objects.get(id=id))).data
+            print(user)
+            print(user_model)
+            self.assertEqual(user, user_model)
 
     def test_endpoint_create(self):
         self.assertTrue(self.client.login(username='admin', password='sysadmin'))
         url = reverse('user-list')
-        response = self.client.post(url, data={
+        data = {
             "password": "AzErTyUiOp#",
             "is_superuser": False,
             "username": "TestUser",
@@ -96,8 +78,73 @@ class UserViewsetTest(APITestCase):
             "groups": [],
             "user_permissions": [],
             "amis": [],
-        }, format='json')
+        }
+        response = self.client.post(url, data=data, format='json')
         print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         test_user = User.objects.get(username='TestUser')
         self.assertTrue(test_user)
+
+    def test_enpoint_delete(self):
+        self.assertTrue(self.client.login(username='admin', password='sysadmin'))
+        url = reverse('user-list')
+        data = {
+            "password": "AzErTyUiOp#",
+            "is_superuser": False,
+            "username": "TestUser",
+            "first_name": "test",
+            "last_name": "user",
+            "email": "test@user.fr",
+            "is_active": True,
+            "street": "11 rue de ma foucherais",
+            "city": "vezin le coquet",
+            "postal_code": "35132",
+            "phone_number": "0620788001",
+            "birth_date": datetime.datetime.now().strftime('%Y-%m-%d'),
+            "groups": [],
+            "user_permissions": [],
+            "amis": [],
+        }
+        response = self.client.post(url, data=data, format='json')
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        test_user = User.objects.get(username='TestUser')
+        self.assertTrue(test_user)
+
+        url = reverse('user-detail', args=[test_user.id])
+        response = self.client.delete(url, format='json')
+        print(response.data)
+        self.assertEqual(response.status_code, 204)
+
+        url = reverse('user-detail-full', args=[test_user.id])
+        response = self.client.get(url, format='json')
+        print(response.data)
+        self.assertEqual(response.status_code, 404)
+
+    def test_endpoint_retrieve_full(self):
+        self.assertTrue(self.client.login(username='admin', password='sysadmin'))
+        url = reverse('user-detail-full', args=[self.user.id])
+        response = self.client.get(url, format='json')
+        user = model_to_dict(self.user)
+        retrieved_user = response.data
+        user = UserDetailSerializer(user).data
+        print(retrieved_user)
+        print(user)
+        # print(user.get('date_joined').strftime('%Y-%m-%dT%H:%M:%S.%fZ'))
+        # print(response.data.get('date_joined'))
+        # user['date_joined'] = user.get('date_joined').strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        # user['birth_date'] = user.get('birth_date').strftime('%Y-%m-%d')
+        self.assertEqual(user, retrieved_user)
+
+    def test_endpoint_list_full(self):
+        self.assertTrue(self.client.login(username='admin', password='sysadmin'))
+        url = reverse('user-list-full')
+        response = self.client.get(url, format='json')
+        user_list = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+
+        for user in user_list:
+            id = user.get('id')
+            model_user = model_to_dict(User.objects.get(id=id))
+            model_user = UserDetailSerializer(model_user)
+            self.assertEqual(user, model_user.data)

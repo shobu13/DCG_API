@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'session_security',
+    'rest_framework_api_key',
 
     'user',
     'api',
@@ -129,9 +130,16 @@ STATIC_URL = '/static/'
 
 # custom user model
 AUTH_USER_MODEL = 'user.User'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Swagger
-LOGIN_URL = '/admin/login'
-LOGOUT_URL = '/admin/logout'
+SWAGGER_SETTINGS = {
+    'LOGIN_URL': '/admin/login',
+    'LOGOUT_URL': '/admin/logout',
+}
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework_api_key.permissions.HasAPIAccess',
+    )
+}

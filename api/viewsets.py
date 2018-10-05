@@ -6,6 +6,7 @@ from rest_framework import mixins
 from django.contrib.auth.hashers import make_password
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
 from user.models import User
 from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer
@@ -17,17 +18,27 @@ class MultiSerializerViewSet(viewsets.GenericViewSet):
     """
     MultiSerializerViewSet est une class custom permettant l'usage de plusieurs serializer
     en fonction de l'action.
+    Elle permet aussi de sélectionner les permissions à accorder en fonction de l'action.
     """
     serializers = {
         'default': None,
+    }
+
+    permission_classes = {
+        'default': api_settings.DEFAULT_PERMISSION_CLASSES
     }
 
     def get_serializer_class(self):
         return self.serializers.get(self.action,
                                     self.serializers['default'])
 
+    def get_permissions(self):
+        permission_list = self.permission_classes.get(self.action, self.permission_classes['default'])
+        return [permission() for permission in permission_list]
 
-class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, ):
+
+class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                  mixins.RetrieveModelMixin):
     """
     Ce viewset permet de manipuler les donnée des Users.
 
@@ -36,21 +47,29 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     create:
     cette fonction permet de créer un utilisateur, le mot de passe est récupérer et haché à l'aide
     de la fonction make_password().
-    user_detail:
+    detail_full:
     Peut être utiliser seulement si administrateur, affiche tout les détails sur un utilisateur.
-    user_detail_all:
+    list_full:
     Peut être utiliser seulement si administrateur, affiche tout les détails sur tout les utilisateurs.
     destroy:
     Cette fonction sert à supprimer un user.
+    retrieve:
+    Cette fonction renvoie les donnée non sensibles d'un user
     """
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
     queryset = User.objects.all()
+
+    permission_classes = {
+        'default': (permissions.IsAuthenticatedOrReadOnly,),
+        'detail_full': (permissions.IsAdminUser, ),
+        'list_full': (permissions.IsAdminUser, ),
+    }
 
     serializers = {
         'default': UserSerializer,
         'create': UserCreateSerializer,
-        'user_detail': UserDetailSerializer,
-        'user_detail_all': UserDetailSerializer,
+        'detail_full': UserDetailSerializer,
+        'list_full': UserDetailSerializer,
     }
 
     def perform_create(self, serializer):
@@ -60,10 +79,9 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     @action(
         detail=True,
         methods=['get'],
-        permission_classes=(permissions.IsAdminUser,),
-        url_path='detail',
+        url_path='detail-full',
     )
-    def user_detail(self, request, *args, **kwargs):
+    def detail_full(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
@@ -71,10 +89,9 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     @action(
         detail=False,
         methods=['get'],
-        permission_classes=(permissions.IsAdminUser,),
-        url_path='detail_all',
+        url_path='list-full',
     )
-    def user_detail_all(self, request, *args, **kwargs):
+    def list_full(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
