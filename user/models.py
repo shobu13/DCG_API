@@ -30,7 +30,6 @@ class User(AbstractUser):
     # TODO créer les tables et gérer les clé étrangères.
     # lieux_fav = clé étrangère vers table lieux, utile pour faire des comparaison entre users
     # centres_interets = de même
-    # act_fav = voir au dessus
     amis = models.ManyToManyField('User', blank=True)
     # bloque = clé étrangère vers une table "bloquage"
     stay_connected = models.BooleanField(default=False)

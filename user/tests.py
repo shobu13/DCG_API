@@ -67,3 +67,6 @@ class UserTest(TestCase):
 
     def test_amis(self):
         self.assertEquals(self.user, self.user2.amis.all()[0])
+
+    def test_full_name(self):
+        self.assertEquals(self.user.get_full_name(), 'Shobu Ser\'Hao')

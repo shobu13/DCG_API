@@ -9,7 +9,11 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from user.models import User
+
+from interests.models import Interest
+
 from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer
+from api.serializers.interest import InterestSerializer
 
 
 # Create your viewsets here.
@@ -33,11 +37,13 @@ class MultiSerializerViewSet(viewsets.GenericViewSet):
                                     self.serializers['default'])
 
     def get_permissions(self):
-        permission_list = self.permission_classes.get(self.action, self.permission_classes['default'])
+        permission_list = self.permission_classes.get(self.action,
+                                                      self.permission_classes['default'])
         return [permission() for permission in permission_list]
 
 
-class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin,
+class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
+                  mixins.DestroyModelMixin,
                   mixins.RetrieveModelMixin):
     """
     Ce viewset permet de manipuler les donnée des Users.
@@ -61,8 +67,8 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
 
     permission_classes = {
         'default': (permissions.IsAuthenticatedOrReadOnly,),
-        'detail_full': (permissions.IsAdminUser, ),
-        'list_full': (permissions.IsAdminUser, ),
+        'detail_full': (permissions.IsAdminUser,),
+        'list_full': (permissions.IsAdminUser,),
     }
 
     serializers = {
@@ -101,3 +107,29 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin):
+    """
+    Ce viewset permet de manipuler les données du modèle interest.
+
+    list:
+    permet de récupérer la liste des interets.
+    create:
+    permet de créer un interet.
+    destroy:
+    permet de supprimer un interet.
+    """
+
+    queryset = Interest.objects.all()
+
+    permission_classes = {
+        'default': (permissions.IsAuthenticatedOrReadOnly,),
+    }
+
+    serializers = {
+        'default': InterestSerializer,
+    }
+
+

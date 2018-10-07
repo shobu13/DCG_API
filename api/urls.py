@@ -22,6 +22,7 @@ from api import viewsets
 
 router = DefaultRouter()
 router.register('user', viewsets.UserViewset)
+router.register('interest', viewsets.InterestViewset)
 
 urlpatterns = [
     path('docs/', get_swagger_view(title='read the docs bastard'))

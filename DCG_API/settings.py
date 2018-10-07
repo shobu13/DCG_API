@@ -39,11 +39,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'session_security',
-    'rest_framework_api_key',
 
     'user',
     'api',
-    'activity',
     'event',
     'interests',
     'places',
@@ -139,7 +137,4 @@ SWAGGER_SETTINGS = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework_api_key.permissions.HasAPIAccess',
-    )
 }
