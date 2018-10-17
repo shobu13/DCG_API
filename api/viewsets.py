@@ -126,6 +126,8 @@ class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Crea
 
     permission_classes = {
         'default': (permissions.IsAuthenticatedOrReadOnly,),
+        'create': (permissions.IsAdminUser, ),
+        'destroy': (permissions.IsAdminUser, ),
     }
 
     serializers = {
