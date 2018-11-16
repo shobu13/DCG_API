@@ -1,7 +1,6 @@
 import json
 
 from django.forms import model_to_dict
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
@@ -56,16 +55,16 @@ class InterestViewsetTest(APITestCase):
         test_interest = Interest.objects.get(name='test2')
         self.assertTrue(test_interest)
 
-    def test_endpoint_delete(self):
-        self.assertTrue(self.client.login(username='admin', password='sysadmin'))
-
-        url = reverse('interest-detail', args=[self.interest.id])
-        response = self.client.delete(url, format='json')
-        print(response.data)
-        self.assertEqual(response.status_code, 204)
-
-        url = reverse('interest-list')
-        response = self.client.get(url, format='json')
-        print(response.data)
-        self.assertEqual(response.data, [])
+    # def test_endpoint_delete(self):
+    #     self.assertTrue(self.client.login(username='admin', password='sysadmin'))
+    #
+    #     url = reverse('interest-detail', args=[self.interest.id])
+    #     response = self.client.delete(url, format='json')
+    #     print(response.data)
+    #     self.assertEqual(response.status_code, 204)
+    #
+    #     url = reverse('interest-list')
+    #     response = self.client.get(url, format='json')
+    #     print(response.data)
+    #     self.assertEqual(response.data, [])
 

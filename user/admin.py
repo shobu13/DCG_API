@@ -21,7 +21,7 @@ class UserAdminCustom(UserAdmin):
                            ),
     filter_horizontal = ('amis',)
 
-    for i in UserAdmin.fieldsets:
+    for i in UserAdmin.fieldsets[1:]:
         i[1]['classes'] = ('collapse',)
 
 

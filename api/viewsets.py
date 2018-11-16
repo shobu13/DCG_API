@@ -9,11 +9,18 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from user.models import User
-
 from interests.models import Interest
+from places.models import Place
+from promo.models import Promo
+from event.models import Event
 
 from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer
 from api.serializers.interest import InterestSerializer
+from api.serializers.place import PlaceSerializer
+from api.serializers.promo import PromoSerializer
+from api.serializers.event import EventSerializer
+
+from event.permissions import IsEventOwner
 
 
 # Create your viewsets here.
@@ -109,13 +116,14 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
         return Response(serializer.data)
 
 
-class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin):
+class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     """
     Ce viewset permet de manipuler les données du modèle interest.
 
     list:
     permet de récupérer la liste des interets.
+    retrieve:
+    permet la récupération d'un interet préçis par son ID
     create:
     permet de créer un interet.
     destroy:
@@ -126,8 +134,8 @@ class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Crea
 
     permission_classes = {
         'default': (permissions.IsAuthenticatedOrReadOnly,),
-        'create': (permissions.IsAdminUser, ),
-        'destroy': (permissions.IsAdminUser, ),
+        'create': (permissions.IsAdminUser,),
+        'destroy': (permissions.IsAdminUser,),
     }
 
     serializers = {
@@ -135,3 +143,47 @@ class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Crea
     }
 
 
+class PlaceViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    """
+    Ce viewset permet de manipuler les données du modèle Place
+    list:
+    renvoie la liste des toutes les places.
+    create:
+    
+    """
+    queryset = Place.objects.all()
+    permission_classes = {
+        'default': (permissions.AllowAny,),
+        'create': (permissions.IsAdminUser,)
+    }
+    serializers = {
+        'default': PlaceSerializer
+    }
+
+
+class PromoViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+    """
+
+    """
+    queryset = Promo.objects.all()
+    permission_classes = {
+        'default': (permissions.AllowAny,)
+    }
+    serializers = {
+        'default': PromoSerializer
+    }
+
+
+class EventViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                   mixins.UpdateModelMixin, mixins.RetrieveModelMixin):
+    """
+
+    """
+    queryset = Event.objects.all()
+    permission_classes = {
+        'default': (permissions.IsAuthenticatedOrReadOnly, IsEventOwner, ),
+        'create': (permissions.IsAuthenticated,)
+    }
+    serializers = {
+        'default': EventSerializer
+    }

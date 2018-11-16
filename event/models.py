@@ -9,3 +9,6 @@ class Event(models.Model):
     end = models.DateTimeField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='event_owner')
     participant = models.ManyToManyField(User)
+
+    def __str__(self):
+        return self.name

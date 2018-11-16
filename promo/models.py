@@ -10,3 +10,6 @@ class Promo(models.Model):
     end = models.DateTimeField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     validation = models.BooleanField()
+
+    def __str__(self):
+        return self.name
