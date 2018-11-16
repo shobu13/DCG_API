@@ -149,7 +149,9 @@ class PlaceViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateM
     list:
     renvoie la liste des toutes les places.
     create:
-    
+    permet de créer une place, néscessite une connexion administrateur
+    retrieve:
+    permet de récupérer une place précise en fonction de son ID.
     """
     queryset = Place.objects.all()
     permission_classes = {
@@ -163,7 +165,11 @@ class PlaceViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateM
 
 class PromoViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     """
-
+    Viewset perrmettant de manipuler les donéne du modèle Promo. Les promo so créer depuis l'inteface d'admin.
+    list:
+    renvoie la liste de toutes les promotions enregistrées.
+    retrieve:
+    renvoie une promotion particulière en fonction de son ID.
     """
     queryset = Promo.objects.all()
     permission_classes = {
@@ -177,7 +183,20 @@ class PromoViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Retriev
 class EventViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin,
                    mixins.UpdateModelMixin, mixins.RetrieveModelMixin):
     """
-
+    Viewset permettant de gérer les évènements. Un évènement ne peut être modifier ou supprimer que par son créateur ou
+    un admin.
+    list:
+    renvoie la liste de tout les évnènements enregistrer dans la BDD.
+    create:
+    permet la création d'un évènement
+    destroy:
+    permet la suppression d'un évènement
+    update:
+    permet la mise à jour totale d'un évènement.
+    partial-update:
+    permet la mise à jour partielle d'un évènement.
+    retrieve:
+    permet de récupérer un évènement en aprticulier via son ID.
     """
     queryset = Event.objects.all()
     permission_classes = {
