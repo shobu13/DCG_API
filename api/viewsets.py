@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.shortcuts import render
 
 from rest_framework import viewsets, status
@@ -14,7 +15,7 @@ from places.models import Place
 from promo.models import Promo
 from event.models import Event
 
-from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer
+from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer, UserConnectSerializer
 from api.serializers.interest import InterestSerializer
 from api.serializers.place import PlaceSerializer
 from api.serializers.promo import PromoSerializer
@@ -83,6 +84,7 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
         'create': UserCreateSerializer,
         'detail_full': UserDetailSerializer,
         'list_full': UserDetailSerializer,
+        'user_connect': UserConnectSerializer,
     }
 
     def perform_create(self, serializer):
@@ -115,8 +117,23 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='user-connect',
+    )
+    def user_connect(self, request):
+        data = request.data
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            return Response(UserSerializer(user).data)
+        return Response(None)
 
-class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+
+class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
+                      mixins.RetrieveModelMixin):
     """
     Ce viewset permet de manipuler les données du modèle interest.
 
@@ -200,7 +217,7 @@ class EventViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateM
     """
     queryset = Event.objects.all()
     permission_classes = {
-        'default': (permissions.IsAuthenticatedOrReadOnly, IsEventOwner, ),
+        'default': (permissions.IsAuthenticatedOrReadOnly, IsEventOwner,),
         'create': (permissions.IsAuthenticated,)
     }
     serializers = {

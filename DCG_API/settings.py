@@ -125,11 +125,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
-MEDIA_ROOT = os.path.join("/var/www/DCG_API", "media")
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join("/var/www/DCG_API", "static")
+# MEDIA_ROOT = os.path.join("/var/www/DCG_API", "media")
+# STATIC_ROOT = os.path.join("/var/www/DCG_API", "static")
+MEDIA_ROOT = os.path.join("media")
+STATIC_ROOT = os.path.join("static")
 
 # custom user model
 AUTH_USER_MODEL = 'user.User'

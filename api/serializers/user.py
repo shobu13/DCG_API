@@ -21,3 +21,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
         depth = 0
+
+
+class UserConnectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'password')
