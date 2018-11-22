@@ -16,13 +16,13 @@ class UserAdminCustom(UserAdmin):
                                },
                            ), (
                                'Social', {
-                                   'fields': ('amis',)
+                                   'fields': ('amis', 'est_verif')
                                },
                            ),
-    filter_horizontal = ('amis',)
+    filter_horizontal = ('amis', )
 
     for i in UserAdmin.fieldsets[1:]:
-        i[1]['classes'] = ('collapse',)
+        i[1]['classes'] = ('collapse', )
 
 
 admin.site.register(User, UserAdminCustom)

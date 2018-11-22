@@ -31,6 +31,7 @@ class User(AbstractUser):
     # lieux_fav = clé étrangère vers table lieux, utile pour faire des comparaison entre users
     # centres_interets = de même
     amis = models.ManyToManyField('User', blank=True)
+    est_verif = models.BooleanField(default=False)
     # bloque = clé étrangère vers une table "bloquage"
     stay_connected = models.BooleanField(default=False)
     # signalement = clé étrangère vers table signalement
