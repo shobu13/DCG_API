@@ -126,6 +126,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MEDIA_ROOT = os.path.join("/var/www/DCG_API", "media")
+MEDIA_URL = '/media/'
+
+STATIC_ROOT = os.path.join("/var/www/DCG_API", "static")
+
 # custom user model
 AUTH_USER_MODEL = 'user.User'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -138,3 +143,5 @@ SWAGGER_SETTINGS = {
 
 REST_FRAMEWORK = {
 }
+
+
