@@ -7,7 +7,7 @@ from api.serializers import user
 
 class EventSerializer(serializers.ModelSerializer):
     owner = user.UserSerializer()
-    participant = user.UserSerializer(many=True)
+    # participant = user.UserSerializer(many=True)
 
     class Meta:
         model = Event
