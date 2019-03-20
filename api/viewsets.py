@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate
-from django.shortcuts import render
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import mixins
 from django.contrib.auth.hashers import make_password
@@ -15,11 +14,11 @@ from places.models import Place
 from promo.models import Promo
 from event.models import Event
 
-from api.serializers.user import UserSerializer, UserCreateSerializer, UserDetailSerializer, UserConnectSerializer
-from api.serializers.interest import InterestSerializer
-from api.serializers.place import PlaceSerializer
-from api.serializers.promo import PromoSerializer
-from api.serializers.event import EventSerializer
+from user.serializers import UserSerializer, UserCreateSerializer, UserDetailSerializer, UserConnectSerializer
+from interests.serializers import InterestSerializer
+from places.serializers import PlaceSerializer
+from promo.serializers import PromoSerializer
+from event.serializers import EventSerializer
 
 from event.permissions import IsEventOwner
 

@@ -2,12 +2,12 @@ from rest_framework import serializers
 
 from event.models import Event
 
-from api.serializers import user
+from user.serializers import UserSimpleSerializer
 
 
 class EventSerializer(serializers.ModelSerializer):
-    owner = user.UserSimpleSerializer()
-    participant = user.UserSimpleSerializer(many=True)
+    owner = UserSimpleSerializer()
+    participant = UserSimpleSerializer(many=True)
 
     class Meta:
         model = Event

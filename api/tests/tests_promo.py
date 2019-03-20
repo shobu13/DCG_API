@@ -1,16 +1,13 @@
-import datetime
 import json
 
-from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
-from rest_framework import status
 
 from rest_framework.test import APIClient, APITestCase
 
 from user.models import User
 
-from api.serializers.promo import PromoSerializer
+from promo.serializers import PromoSerializer
 
 from promo.models import Promo
 

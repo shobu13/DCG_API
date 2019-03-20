@@ -10,7 +10,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from user.models import User
 
-from api.serializers.user import UserDetailSerializer, UserSerializer
+from user.serializers import UserDetailSerializer, UserSerializer
 
 
 class UserViewsetTest(APITestCase):

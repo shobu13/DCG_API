@@ -16,9 +16,23 @@ Including another URLconf
 from django.urls import path, URLPattern
 
 from rest_framework.routers import DefaultRouter
-from rest_framework_swagger.views import get_swagger_view
+from rest_framework import permissions
+
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from api import viewsets
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="DCG API",
+        default_version='v3.14',
+        description="read the docs",
+        contact=openapi.Contact(email="lelu.awen@hacari.org"),
+    ),
+    public=True,
+    permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
+)
 
 router = DefaultRouter()
 router.register('user', viewsets.UserViewset)
@@ -28,7 +42,8 @@ router.register('promos', viewsets.PromoViewset)
 router.register('events', viewsets.EventViewset)
 
 urlpatterns = [
-    path('docs/', get_swagger_view(title='read the docs bastard'))
+    path('docs/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('docs/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 urlpatterns += router.urls
 # i: URLPattern

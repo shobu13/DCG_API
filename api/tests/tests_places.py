@@ -8,7 +8,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from user.models import User
 
-from api.serializers.place import PlaceSerializer
+from places.serializers import PlaceSerializer
 
 from places.models import Place
 

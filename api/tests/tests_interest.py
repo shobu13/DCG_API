@@ -8,7 +8,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from user.models import User
 
-from api.serializers.interest import InterestSerializer
+from interests.serializers import InterestSerializer
 
 from interests.models import Interest
 
