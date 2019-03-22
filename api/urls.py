@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path, URLPattern
 
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 from rest_framework import permissions
 
 from drf_yasg.views import get_schema_view
@@ -34,7 +34,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
 )
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register('user', viewsets.UserViewset)
 router.register('interests', viewsets.InterestViewset)
 router.register('places', viewsets.PlaceViewset)
@@ -46,6 +46,7 @@ urlpatterns = [
     path('docs/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 urlpatterns += router.urls
+print(urlpatterns)
 # i: URLPattern
 # for i in router.urls:
 #     print(i.name, i.pattern)
