@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import mixins
-from django.contrib.auth.hashers import make_password
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -14,7 +14,8 @@ from places.models import Place
 from promo.models import Promo
 from event.models import Event
 
-from user.serializers import UserSerializer, UserCreateSerializer, UserDetailSerializer, UserConnectSerializer
+from user.serializers import UserSerializer, UserCreateSerializer, UserDetailSerializer, UserConnectSerializer, \
+    UserSimpleSerializer, UserChangePasswordSerializer
 from interests.serializers import InterestSerializer
 from places.serializers import PlaceSerializer
 from promo.serializers import PromoSerializer
@@ -73,29 +74,42 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     queryset = User.objects.all()
 
     permission_classes = {
-        'default': (permissions.IsAuthenticatedOrReadOnly,),
-        'detail_full': (permissions.IsAdminUser,),
-        'list_full': (permissions.IsAdminUser,),
+        'default': (permissions.IsAuthenticated,)
+        # 'list_full': (permissions.IsAdminUser,),
     }
 
     serializers = {
         'default': UserSerializer,
+        'list': UserSimpleSerializer,
         'create': UserCreateSerializer,
         'detail_full': UserDetailSerializer,
-        'list_full': UserDetailSerializer,
-        'user_connect': UserConnectSerializer,
+        'change_password': UserChangePasswordSerializer
+        # 'list_full': UserDetailSerializer,
+        # 'user_connect': UserConnectSerializer,
     }
 
     def perform_create(self, serializer):
-        user = serializer.save()
-        user.password = make_password(serializer["password"])
+        serializer_data = serializer.data
+        user = User.objects.create_user(
+            username=serializer_data["username"],
+            email=serializer_data["email"],
+            password=serializer_data["password"]
+        )
+        user.first_name = serializer_data["first_name"]
+        user.last_name = serializer_data["last_name"]
+        user.street = serializer_data["street"]
+        user.postal_code = serializer_data["postal_code"]
+        user.city = serializer_data["city"]
+        user.phone_number = serializer_data["phone_number"]
+        user.birth_date = serializer_data["birth_date"]
+        user.save()
 
     @action(
         detail=True,
         methods=['get'],
-        url_path='detail-full',
+        url_path='retrieve-full',
     )
-    def detail_full(self, request, *args, **kwargs):
+    def retrieve_full(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
@@ -119,16 +133,31 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     @action(
         detail=False,
         methods=['post'],
-        url_path='user-connect',
+        url_path='change-password'
     )
-    def user_connect(self, request):
-        data = request.data
-        username = data.get('username')
-        password = data.get('password')
-        user = authenticate(username=username, password=password)
-        if user:
-            return Response(UserSerializer(user).data)
-        return Response(None)
+    def change_password(self, request, *args, **kwargs):
+        serializer = UserChangePasswordSerializer(data=request.data)
+        serializer.is_valid()
+        if authenticate(request, username=request.user.username, password=serializer.validated_data["old_password"]):
+            request.user.set_password(serializer.validated_data["new_password"])
+            request.user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": "password not match"})
+
+
+# @action(
+#     detail=False,
+#     methods=['post'],
+#     url_path='user-connect',
+# )
+# def user_connect(self, request):
+#     data = request.data
+#     username = data.get('username')
+#     password = data.get('password')
+#     user = authenticate(username=username, password=password)
+#     if user:
+#         return Response(UserSerializer(user).data)
+#     return Response(None)
 
 
 class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin,
@@ -149,9 +178,7 @@ class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Crea
     queryset = Interest.objects.all()
 
     permission_classes = {
-        'default': (permissions.IsAuthenticatedOrReadOnly,),
-        'create': (permissions.IsAdminUser,),
-        'destroy': (permissions.IsAdminUser,),
+        'default': (permissions.AllowAny,),
     }
 
     serializers = {
@@ -159,7 +186,7 @@ class InterestViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Crea
     }
 
 
-class PlaceViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+class PlaceViewset(MultiSerializerViewSet, mixins.ListModelMixin, ):
     """
     Ce viewset permet de manipuler les données du modèle Place
     list:
@@ -181,7 +208,7 @@ class PlaceViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateM
 
 class PromoViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
     """
-    Viewset perrmettant de manipuler les donéne du modèle Promo. Les promo so créer depuis l'inteface d'admin.
+    Viewset permettant de manipuler les donéne du modèle Promo. Les promo so créer depuis l'inteface d'admin.
     list:
     renvoie la liste de toutes les promotions enregistrées.
     retrieve:
@@ -189,7 +216,10 @@ class PromoViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.Retriev
     """
     queryset = Promo.objects.all()
     permission_classes = {
-        'default': (permissions.AllowAny,)
+        'default': (permissions.IsAdminUser,),
+        'list': (permissions.AllowAny,),
+        'retrieve': (permissions.AllowAny,)
+        # TODO permission pour les promoteurs
     }
     serializers = {
         'default': PromoSerializer
@@ -217,6 +247,8 @@ class EventViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateM
     queryset = Event.objects.all()
     permission_classes = {
         'default': (permissions.IsAuthenticatedOrReadOnly, IsEventOwner,),
+        'list': (permissions.AllowAny,),
+        'retrieve': (permissions.AllowAny,),
         'create': (permissions.IsAuthenticated,)
     }
     serializers = {

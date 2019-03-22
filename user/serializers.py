@@ -14,7 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = (
+            'username', 'first_name', 'last_name', 'email', 'street', 'postal_code', 'city', 'phone_number',
+            'birth_date')
 
 
 class UserSimpleSerializer(serializers.ModelSerializer):
@@ -28,7 +30,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ('password',)
         depth = 0
 
 
@@ -36,3 +38,8 @@ class UserConnectSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'password')
+
+
+class UserChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField()
