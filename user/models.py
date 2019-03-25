@@ -16,7 +16,6 @@ class User(AbstractUser):
     sois visible par ses amis ET par tous, ce champs ne devrait prendre effet que si le précédent
     à été mit à True.
     """
-    street = models.TextField()
     city = models.CharField(max_length=200)
     postal_code = models.CharField(max_length=5, default='')
     phone_number = models.CharField(max_length=12)
@@ -34,6 +33,7 @@ class User(AbstractUser):
     est_verif = models.BooleanField(default=False)
     # bloque = clé étrangère vers une table "bloquage"
     stay_connected = models.BooleanField(default=False)
+
     # signalement = clé étrangère vers table signalement
 
     def save(self, *args, **kwargs):

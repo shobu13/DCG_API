@@ -1,4 +1,7 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ValidationError
+from requests import Request
 
 from rest_framework import viewsets
 from rest_framework import permissions
@@ -8,11 +11,16 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from rest_framework_jwt.settings import api_settings as api_settings_jwt
+
+from typing import Any
+
 from user.models import User
 from interests.models import Interest
 from places.models import Place
 from promo.models import Promo
 from event.models import Event
+from user.permissions import IsOwner
 
 from user.serializers import UserSerializer, UserCreateSerializer, UserDetailSerializer, UserConnectSerializer, \
     UserSimpleSerializer, UserChangePasswordSerializer
@@ -74,7 +82,10 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     queryset = User.objects.all()
 
     permission_classes = {
-        'default': (permissions.IsAuthenticated,)
+        'default': (permissions.IsAuthenticated,),
+        'create': (permissions.AllowAny,),
+        'retrieve_pass': (permissions.IsAuthenticated, IsOwner,),
+        'stay_connect': (permissions.AllowAny,)
         # 'list_full': (permissions.IsAdminUser,),
     }
 
@@ -82,22 +93,31 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
         'default': UserSerializer,
         'list': UserSimpleSerializer,
         'create': UserCreateSerializer,
-        'detail_full': UserDetailSerializer,
-        'change_password': UserChangePasswordSerializer
+        'retrieve_pass': UserConnectSerializer,
+        'change_password': UserChangePasswordSerializer,
+        'stay_connect': UserConnectSerializer,
         # 'list_full': UserDetailSerializer,
         # 'user_connect': UserConnectSerializer,
     }
 
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as err:
+            print(err)
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'password': err})
+
     def perform_create(self, serializer):
         serializer_data = serializer.data
-        user = User.objects.create_user(
+        print(serializer_data)
+        user = User.objects.create(
             username=serializer_data["username"],
             email=serializer_data["email"],
-            password=serializer_data["password"]
+            password=make_password(serializer_data["password"])
         )
+
         user.first_name = serializer_data["first_name"]
         user.last_name = serializer_data["last_name"]
-        user.street = serializer_data["street"]
         user.postal_code = serializer_data["postal_code"]
         user.city = serializer_data["city"]
         user.phone_number = serializer_data["phone_number"]
@@ -107,9 +127,10 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
     @action(
         detail=True,
         methods=['get'],
-        url_path='retrieve-full',
+        url_path='retrieve-pass',
     )
-    def retrieve_full(self, request, *args, **kwargs):
+    def retrieve_pass(self, request, *args, **kwargs):
+        print(request.data)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
@@ -143,6 +164,24 @@ class UserViewset(MultiSerializerViewSet, mixins.ListModelMixin, mixins.CreateMo
             request.user.save()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": "password not match"})
+
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='stay-connect'
+    )
+    def stay_connect(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.data)
+        user = User.objects.get(username=serializer.data['username'])
+        if user.password == serializer.data['password']:
+            jwt_payload_handler = api_settings_jwt.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings_jwt.JWT_ENCODE_HANDLER
+
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+            return Response(status=status.HTTP_200_OK, data={'token': token})
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={'err': 'identifiants incorrects.'})
 
 
 # @action(
