@@ -30,7 +30,7 @@ schema_view = get_schema_view(
         description="read the docs",
         contact=openapi.Contact(email="lelu.awen@hacari.org"),
     ),
-    public=True,
+    public=False,
     permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
 )
 
@@ -42,7 +42,6 @@ router.register('promos', viewsets.PromoViewset)
 router.register('events', viewsets.EventViewset)
 
 urlpatterns = [
-    path('docs/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('docs/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 urlpatterns += router.urls

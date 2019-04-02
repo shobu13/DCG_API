@@ -134,6 +134,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join("media")
 STATIC_ROOT = os.path.join("static")
 
+# AUTHENTICATION_BACKENDS
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    # 'core.auth_backend.HashLogin'
+]
+
 # custom user model
 AUTH_USER_MODEL = 'user.User'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
